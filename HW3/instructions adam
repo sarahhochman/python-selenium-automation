@@ -1,0 +1,456 @@
+
+Autocorrected to causeConversation opened. 3 messages. All messages read.
+
+Skip to content
+Using Bi-Cultural Hebrew Academy Mail with screen readers
+3 of 47
+codeHS
+Inbox
+
+Adam Daniel
+Sun, Feb 12, 3:04 PM (2 days ago)
+to me
+
+/*
+ * In this project, you'll use steganography to encode a secret
+ * image inside of a cover image without the cover
+ * image looking modified.
+ *
+ * YOUR JOB: implement the following functions
+ */
+
+/*
+ * Encodes the given secret pixel into the low bits of the
+ * RGB values of the given cover pixel
+ * Returns the modified cover pixel
+ */
+function encodePixel(coverPixel, secretPixel) {
+    var coverPixel = [];
+    var secretPixel = [];
+    // IMPLEMENT THIS FUNCTION
+    for(var i = 0; i < 3; i++){
+        if(secretPixel[i] > 255){
+            secretPixel[i] = 255;
+        }
+        if(secretPixel[i] < 0){
+            secretPixel[i] = 0;
+        }
+        if(secretPixel[i] >= 0 && secretPixel[i] <= 127){
+            secretPixel[i] = 0;
+        }
+        if(secretPixel[i] >= 128 && secretPixel[i] <= 255){
+            secretPixel[i] = 1;
+        }
+    }
+    return coverPixel;
+
+}
+
+/*
+ * Extracts the RGB values for a secret pixel from the low bits
+ * of the given cover pixel
+ * Returns the resulting secret pixel
+ */
+function decodePixel(coverPixel) {
+    var coverPixel = [];
+    var secretPixel = [];
+    // IMPLEMENT THIS FUNCTION
+    for(var i = 0; i < 3; i++){
+        if(coverPixel[i] >= 0 && coverPixel[i] <= 127){
+            secretPixel[i] = 0;
+        }
+        if(coverPixel[i] >= 129 && coverPixel[i] <= 255){
+            secretPixel[i] = 255;
+        }
+    }
+    return secretPixel;
+}
+
+//=========HELPER FUNCTIONS==========\\
+
+// Returns true if the given value is even, false otherwise
+function isEven(value) {
+    // IMPLEMENT THIS FUNCTION
+    if(value % 2 == 0){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+/*
+ * Given a number, return the lowest bit in the binary representation
+ * of the number.
+ * Returns either a 0 or a 1
+ */
+function getLowestBit(value) {
+    // IMPLEMENT THIS FUNCTION
+    if(isEven(value)){
+        return 0;
+    }else{
+        return 1;
+    }
+}
+
+/*
+ * Given a number, return a new number with the same underlying bits
+ * except the lowest bit is set to the given bitValue.
+ */
+function setLowestBit(value, bitValue) {
+    // IMPLEMENT THIS FUNCTION
+    bitValue = getlowestBit(value);
+    return bitValue;
+}
+
+//==============CONSTANTS==============\\
+
+// Constants for the images
+var ORIGINAL_URL = "https://codehs.com/static/img/zebra.jpg";
+var SECRET_IMAGE_URL = "https://codehs.com/static/img/about/goldengate.jpg";
+
+// Constants for pixel indices
+var RED = 0;
+var GREEN = 1;
+var BLUE = 2;
+
+// Constants for colors
+var MAX_COLOR_VALUE = 255;
+var MIN_COLOR_VALUE = 0;
+var COLOR_THRESHOLD = 128;
+
+/********************STARTER CODE BELOW******************************
+ *
+ * Feel free to read the starter code and see how this program works!
+ * But you do not need to change any code below this line.
+ *
+ * Your job is to implement the functions above this line!
+ *
+/********************************************************************/
+
+
+// Constants for spacing
+var X_GAP = 10;
+var Y_GAP = 25;
+var TEXT_Y_GAP = 4;
+var IMAGE_WIDTH = getWidth() / 2 - X_GAP * 2;
+var IMAGE_HEIGHT = getHeight() / 3 - Y_GAP * 1.1;
+var IMAGE_X = 10;
+var IMAGE_Y = 25;
+
+// Image width cannot be odd, it messes up the math of the encoding
+if(IMAGE_WIDTH % 2 == 1) {
+    IMAGE_WIDTH -= 1;
+}
+
+// We need to wait for the image to load before modifying it
+var IMAGE_LOAD_WAIT_TIME = 50;
+
+function start() {
+    // Set up original image
+    var original = new WebImage(ORIGINAL_URL);
+    original.setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
+    original.setPosition(IMAGE_X, IMAGE_Y);
+
+    // Set up secret image
+    var secret = new WebImage(SECRET_IMAGE_URL);
+    secret.setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
+    secret.setPosition(IMAGE_X + original.getWidth() + X_GAP, IMAGE_Y);
+
+    // Set up the cover image
+    // (identical to original, but will be modified to encode the secret image)
+    var cover = new WebImage(ORIGINAL_URL);
+    var coverX = getWidth() / 2 - IMAGE_WIDTH / 2;
+    cover.setSize(IMAGE_WIDTH, IMAGE_HEIGHT);
+    cover.setPosition(IMAGE_X + IMAGE_WIDTH / 2, IMAGE_Y + Y_GAP + IMAGE_HEIGHT);
+
+    // Add originals
+    add(original);
+    add(secret);
+
+    // Add the cover image that will be used for encrypting the secret image
+    add(cover);
+
+    // Wait for images to load before encrypting and decrypting
+    setTimeout(function(){
+        encrypt(cover, secret);
+        decrypt(cover);
+    }, IMAGE_LOAD_WAIT_TIME);
+
+    // Add labels for each image
+    var originalLabel = new Text("Original Cover Image", "11pt Arial");
+    originalLabel.setPosition(original.getX(), original.getY() - TEXT_Y_GAP);
+    add(originalLabel);
+
+    var secretLabel = new Text("Original Secret Image", "11pt Arial");
+    secretLabel.setPosition(secret.getX(), secret.getY() - TEXT_Y_GAP);
+    add(secretLabel);
+
+    var coverLabel = new Text("Cover Image with Secret Image encoded inside", "11pt Arial");
+    coverLabel.setPosition(getWidth() / 2 - coverLabel.getWidth() / 2, cover.getY() - TEXT_Y_GAP);
+    add(coverLabel);
+
+    var resultLabel = new Text("Resulting Secret Image decoded from Cover Image", "11pt Arial");
+    resultLabel.setPosition(getWidth() / 2 - resultLabel.getWidth() / 2, cover.getY() + IMAGE_HEIGHT + Y_GAP - TEXT_Y_GAP );
+    add(resultLabel);
+}
+
+/*
+ * Encrypts the secret image inside of the cover image.
+ * For each pixel in the cover image, the lowest bit of each
+ * R, G, and B value is set to a 0 or 1 depending on the amount of
+ * R, G, and B in the corresponding secret pixel.
+ * If an R, G, or B value in the secret image is between 0 and 127,
+ * set a 0, if it is between 128 and 255, set a 1.
+ */
+function encrypt(cover, secret) {
+
+    // Make sure cover and secret are the same size.
+    var width = cover.getWidth();
+    var height = cover.getHeight();
+    secret.setSize(width, height);
+
+    // Loop over each pixel in the image
+    for(var x = 0; x < width; x++) {
+        for(var y = 0; y < height; y++) {
+
+            // Get the pixels at this location for both images
+            var coverPixel = cover.getPixel(x, y);
+            var secretPixel = secret.getPixel(x, y);
+
+            // Modify the cover pixel to encode the secret pixel
+            var newCoverPixel = encodePixel(coverPixel, secretPixel);
+
+            // Update this pixel in the cover image to have the
+            // secret bit encoded
+            cover.setRed(x, y, newCoverPixel[RED]);
+            cover.setGreen(x, y, newCoverPixel[GREEN]);
+            cover.setBlue(x, y, newCoverPixel[BLUE]);
+        }
+    }
+}
+
+/*
+ * Decrypts a secret image from an encoded cover image.
+ */
+function decrypt(coverImage) {
+
+    // secretImage will start off the same as the cover image.
+    // As we loop over the coverImage to discover the secret embedded image,
+    // we will update secretImage pixel by pixel
+    var secretImage = new WebImage(coverImage.filename);
+
+    // We need to add secretImage to the canvas before we can modify it
+    secretImage.setSize(coverImage.getWidth(), coverImage.getHeight());
+    secretImage.setPosition(coverImage.getX(), coverImage.getY() + coverImage.getHeight() + Y_GAP);
+    add(secretImage);
+
+    // Wait for secretImage to load on the canvas before we start
+    // modifying its pixels.
+    setTimeout(function(){
+        computeSecretImage(coverImage, secretImage);
+    }, IMAGE_LOAD_WAIT_TIME);
+}
+
+/*
+ * Set the pixels in the image secret based on the lowest
+ * bit values in the pixels of the image cover.
+ */
+function computeSecretImage(cover, secret) {
+    // Loop over every pixel in the cover image
+    for(var x = 0; x < cover.getWidth(); x++) {
+        for(var y = 0; y < cover.getHeight(); y++) {
+            //Get the current pixel of the cover image
+            var coverPixel = cover.getPixel(x, y);
+
+            // Compute the secretPixel from this cover pixel
+            var secretPixel = decodePixel(coverPixel);
+
+            // Update the pixel in the secret image to match the computed secret pixel
+            secret.setRed(x, y, secretPixel[RED]);
+            secret.setGreen(x, y, secretPixel[GREEN]);
+            secret.setBlue(x, y, secretPixel[BLUE]);
+        }
+    }
+}
+
+
+Adam Daniel
+Sun, Feb 12, 3:05 PM (2 days ago)
+to me
+
+SECRET IMAGE STEGANOGRAPHY
+In this program, you’ll be using steganography to hide a secret image inside of a cover image, without the cover image looking modified at all!
+
+The result looks like this:
+
+HOW IS THIS POSSIBLE?
+Information about each pixel of the secret image is encoded in the least significant bits or the lowest bits of each pixel in the cover image. More on this later.
+
+YOUR JOB:
+You will be writing two image filters.
+
+One filter encodes. It takes a pixel of the cover image and a pixel of the secret image, and encodes information about the secret pixel into the low bits of the cover pixel.
+
+The other filter decodes. It takes a pixel of the cover image, looks at the lowest bits of the cover pixel, and extracts the secret pixel from this information.
+
+YOUR JOB IS TO IMPLEMENT 2 FUNCTIONS:
+
+1. The encodePixel function:
+/*
+ * Given a coverPixel and a secretPixel,
+ * the lowest bit of each
+ * R, G, and B value in the coverPixel
+ * should be set to a 0 or 1
+ * depending on the amount of
+ * R, G, and B in the secretPixel:
+ *
+ * If the R, G, or B value in the
+ * secretPixel is between 0 and 127,
+ * set a 0.
+ *
+ * If it is between 128 and 255, set a 1.
+ *
+ * Returns the modified coverPixel
+ */
+function encodePixel(coverPixel, secretPixel)
+We want to set the lowest bit of the coverPixel’s Red value to indicate some information about the secretPixel’s Red value. Likewise for Green and Blue.
+
+If the secretPixel has a high Red value (ie between 128 and 255), then the coverPixel’s Red value should have its low bit set to a 1.
+
+If the secretPixel has a low Red value (ie between 0 and 127), then the coverPixel’s Red value should have its low bit set to a 0.
+
+The same process should happen for Green and Blue.
+
+You’ll want to write a setLowestBit function to take care of modifying bits (more on this in the HELPER FUNCTION section later).
+
+EXAMPLE:
+Suppose there is a function call encodePixel(coverPixel, secretPixel) where
+
+coverPixel = [34, 52, 202]
+secretPixel = [200, 200, 30]
+We can’t encode the entire RGB values of secretPixel into coverPixel, but we can encode a single bit of information: ie is there a lot of this color in the secret pixel? yes, or no?
+
+So, secretPixel has a lot of Red (R >= 128), a lot of Green (G >= 128) and a not very much Blue (B < 128). So we’ll encode a 1 for Red, 1 for Green, and a 0 for Blue: [1, 1, 0]
+
+To modify coverPixel, we’ll set coverPixel’s Red value to have a low bit of 1, we’ll set coverPixel’s Green value to have a low bit of 1, and we’ll set coverPixel’s Blue value to have a low bit of 0:
+
+coverPixel[RED] = setLowestBit(coverPixel[RED], 1)
+coverPixel[GREEN] = setLowestBit(coverPixel[GREEN], 1);
+coverPixel[BLUE] = setLowestBit(coverPixel[BLUE], 0);
+This will change:
+coverPixel[RED] from 34 to 35 to have a low bit of 1
+coverPixel[GREEN] from 52 to 53 to have a low bit of 1
+coverPixel[BLUE] will remain the same, since 202 already has a lowest bit of 0:
+
+3410 –> 3510 == 001000102 –> 001000112
+
+5210 –> 5310 == 001101002 –> 001101012
+
+20210 == 110010102
+
+So now we have:
+
+coverPixel = [35, 53, 202]
+So we are only changing each value of the pixel by at most 1! That’s why the resulting cover image looks almost exactly the same. The difference is undetectable.
+
+The coverPixel now encodes one bit of information for each color in the secretPixel.
+
+2. The decodePixel function:
+/*
+ * Extracts the RGB values for a secret pixel
+ * from the given cover pixel.
+ *
+ * If the low bit of the R, G, or B value
+ * in the coverPixel is a 1,
+ * then the resulting secretPixel should
+ * have that channel (R, G, or B)
+ * set all the way to 255.
+ *
+ * Otherwise the low bit of the R, G, or B value
+ * in the coverPixel is a 0,
+ * so the resulting secretPixel should have that channel
+ * (R, G, or B) set all the way down to 0.
+ *
+ * Returns the resulting secret pixel
+ */
+function decodePixel(coverPixel)
+Now we’ll extract the secretPixel out of an encoded coverPixel!
+
+Information about the secretPixel Red value is encoded in the lowest bit of the coverPixel Red value. Likewise for Green and Blue.
+
+We need to access the lowest bit for each value. You’ll want to implement a getLowestBit function to help access the low bit (more on this in the HELPER FUNCTION section later).
+
+If the lowest bit of the coverPixel’s Red value is a 1, then the secretPixel Red value should be set all the way up to 255. If the lowest bit of the coverPixel’s Red value is a 0, then the secretPixel Red value should be all the way down to 0.
+Same for Green and Blue.
+
+EXAMPLE:
+Suppose there is a function call to decodePixel(coverPixel) where coverPixel is:
+
+coverPixel = [35, 53, 202]
+Then looking at the lowest bits of each value:
+Red: 3510 = 001000112
+Green: 5310 = 001101012
+Blue: 20210 = 110010102
+
+var redBit = getLowestBit(coverPixel[RED]);     // redBit is 1
+var greenBit = getLowestBit(coverPixel[GREEN]); // greenBit is 1
+var blueBit = getLowestBit(coverPixel[BLUE]);   // blueBit is 0
+We have a 1 for Red, 1 for Green, and 0 for Blue.
+
+Our low bit values are [1, 1, 0].
+
+But that is an incredibly dark pixel. You can’t see the difference between a 1 and a 0 in an image.
+
+To fix this, multiply each of these values by 255 to get the resulting secretPixel:
+[255, 255, 0].
+
+And this is the value that should be returned!
+
+coverPixel = [35, 53, 202]
+coverPixelLowBits = [1, 1, 0]
+
+secretPixel = [255, 255, 0]  // This should be returned
+So the secretPixel [255, 255, 0] was decoded from the coverPixel!
+
+HELPER FUNCTIONS
+It will be very helpful to implement the following helper functions:
+
+The isEven function
+// Returns true if the given value is even, false otherwise
+function isEven(value)
+HINT: all even values have a remainder of 0 after dividing by 2, while all odd values have a remainder of 1 after dividing by 2.
+
+The getLowestBit function
+/*
+ * Given a value,
+ * return the lowest bit in the binary representation
+ * of the value.
+ *
+ * Returns either a 0 or a 1
+ */
+function getLowestBit(value)
+HINT: What is true about all binary numbers that end with a 0? What is true about all binary numbers that end with a 1? Think about even/odd…
+
+The setLowestBit function
+/*
+ * Given a value, return a new value
+ * with the same underlying bits
+ * except the lowest bit is set to the given bitValue.
+ */
+function setLowestBit(value, bitValue)
+HINT: There are 2 cases: we want to set the lowest bit to a 0, or a 1
+
+If we want to set a low bit of 0, there are 2 cases: the value is even or odd.
+
+If the value is even, the low bit is already 0!
+If the value is odd, we can subtract 1 to set the low bit to a 0 (ie 510 = 101 2, subtract 1 to get 410 = 1002)
+If we want to set a low bit of 1, there are 2 cases: the value is even or odd.
+
+If the value is odd, the low bit is already 1!
+If the value is even, we can add 1 to set the low bit too a 1 (ie 410 = 1002, add one to get 510 = 1012)
+Practice PT: Steganography
+9.1
+
+
+Adam Daniel (adaniel@bcha-ct.org)
+

@@ -1,11 +1,16 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+from selenium.webdriver.chrome.service import Service
 
 
 def browser_init(context):
     """
     :param context: Behave context
     """
-    context.driver = webdriver.Chrome()
+    # driver = webdriver.Chrome(executable_path='/Users/svetlanalevinsohn/JobEasy/13-python-selenium-automation/chromedriver')
+    service = Service('/Users/svetlanalevinsohn/JobEasy/13-python-selenium-automation/chromedriver')
+    context.driver = webdriver.Chrome(service=service)
     # context.browser = webdriver.Safari()
     # context.browser = webdriver.Firefox()
 
