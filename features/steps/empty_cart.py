@@ -5,7 +5,7 @@ from behave import given, when, then
 
 @when('Click on Cart icon')
 def click_cart(context):
-    context.driver.find_element(By.CSS_SELECTOR, 'span.nav-cart-icon').click()
+    context.driver.find_element(By.CSS_SELECTOR, "#nav-cart").click()
 
 
 @then('Text says Cart is Empty')
