@@ -10,13 +10,13 @@ GO_TO_CHECKOUT = (By.CSS_SELECTOR, "input[name=proceedToRetailCheckout]")
 
 @when('price is clicked')
 def price_clicked(context):
-    context.driver.find_element(*PRODUCT_PRICE).click()
-
+    #context.driver.find_element(*PRODUCT_PRICE).click()
+    context.app.base_page.click(*PRODUCT_PRICE)
 
 @when('add to cart is clicked')
 def add_to_cart(context):
-    context.driver.find_element(*ADD_TO_CART).click()
-
+    #context.driver.find_element(*ADD_TO_CART).click()
+    context.app.base_page.wait_for_element_click(*ADD_TO_CART)
 
 @then('Verify {number} item in cart')
 def verify_number_in_cart(context, number):
@@ -26,5 +26,6 @@ def verify_number_in_cart(context, number):
 
 @then('proceed to checkout')
 def checkout(context):
-    assert context.driver.find_element(*GO_TO_CHECKOUT).is_displayed(), f'checkout button does not appear'
-    print('Test passed!')
+    #assert context.driver.find_element(*GO_TO_CHECKOUT).is_displayed(), f'checkout button does not appear'
+    #print('Test passed!')
+    context.app.base_page.verify_item_displayed('Checkout cart', *GO_TO_CHECKOUT)

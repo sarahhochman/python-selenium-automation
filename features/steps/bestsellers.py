@@ -4,17 +4,17 @@ from behave import given, when, then
 
 BEST_SELLER = (By.CSS_SELECTOR, "a[href='/gp/bestsellers/?ref_=nav_cs_bestsellers']")
 BEST_SELLER_SUB_LINKS = (By.CSS_SELECTOR, "div[class*='nav-tab-all_style_zg-tabs-li']")
-BEST_SELLLER_SUB =
-NEW_RELEASE_SUB =
-MOVERS_SUB =
-WISHED_SUB =
-GIVE_SUB =
-BEST_TITLE =
-NEW_RELEASE_TITLE =
-MOVERS_TITLE =
-WISHED_TITLE =
-WISHED_TITLE =
-GIVE_TITLE =
+#BEST_SELLLER_SUB =
+#NEW_RELEASE_SUB =
+#MOVERS_SUB =
+#WISHED_SUB =
+#GIVE_SUB =
+#BEST_TITLE =
+#NEW_RELEASE_TITLE =
+#MOVERS_TITLE =
+#WISHED_TITLE =
+#WISHED_TITLE =
+#GIVE_TITLE =
 
 @given('Best sellers page is open')
 def open_best_seller_page(context):
@@ -36,7 +36,5 @@ def five_links(context):
     assert expected_amount == actual_amount, f'expected {expected_amount} but got {actual_amount}'
 
 
-@then('Link clicked correct page displayed')
-def link_click_correct_page(context):
-
-
+#@then('Link clicked correct page displayed')
+#def link_click_correct_page(context):

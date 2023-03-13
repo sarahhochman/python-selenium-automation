@@ -6,3 +6,8 @@ Feature: Amazon Sign in page opens
     When Account clicked
     Then Sign in displayed
     Then email field appears
+
+  Scenario: Logged out user sees Sign in page when clicking Orders
+    Given Amazon.com is open
+    When Click Amazon Orders link
+    Then Verify Sign In page is opened
