@@ -39,7 +39,7 @@ class BasePage:
 
     def verify_text(self, expected_text, *locator):
         actual_text = self.driver.find_element(*locator).text
-        assert expected_text == actual_text, \
+        assert expected_text == actual_text
             f'Checking by locator {locator}. Expected {expected_text}, but got {actual_text}'
 
     def verify_partial_text(self, expected_text, *locator):
@@ -52,3 +52,6 @@ class BasePage:
 
     def verify_item_displayed(self,  expected_result, *locator):
         assert self.driver.find_element(*locator).is_displayed(), f'{expected_result} does not appear'
+
+    def verify_items_displayed(self, expected_result, *locator):
+        assert self.driver.find_elements(*locator).is_displayed(), f'{expected_result} does not appear'
